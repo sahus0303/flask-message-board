@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>VIP Message</title>
+</head>
+<body>
+    <h1>VIP Message Board</h1>
+    <form id="form">
+        <input type="text" id="message" placeholder="Enter VIP message" required maxlength="100">
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('message').value;
+            await fetch('/submit_vip', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            alert('VIP message sent!');
+            document.getElementById('message').value = '';
+        });
+    </script>
+</body>
+</html>

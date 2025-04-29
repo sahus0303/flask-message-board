@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Public Message</title>
+</head>
+<body>
+    <h1>Leave Your Message</h1>
+    <form id="form">
+        <input type="text" id="message" placeholder="Enter message" required maxlength="100">
+        <button type="submit">Submit</button>
+    </form>
+
+    <script>
+        document.getElementById('form').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('message').value;
+            await fetch('/submit_normal', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            alert('Message sent!');
+            document.getElementById('message').value = '';
+        });
+    </script>
+</body>
+</html>
