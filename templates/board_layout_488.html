@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>488-Tile Message Board</title>
+  <style>
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      font-family: sans-serif;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(26, 1fr);
+      grid-template-rows: repeat(21, 1fr);
+      width: 100vw;
+      height: 100vh;
+      position: relative;
+      z-index: 1;
+      background: url("/static/SAFLOGO.png") center center no-repeat;
+      background-size: cover;
+      opacity: 0.5;
+    }
+
+    .tile {
+      border: 1px solid #ccc;
+      background-color: transparent;
+      box-sizing: border-box;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.5vw;
+      overflow: hidden;
+      padding: 4px;
+      width: 100%;
+      height: 100%;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .vip-label {
+      background-color: white;
+      padding: 4px 8px;
+      font-size: 1vw;
+      font-weight: bold;
+      border-radius: 4px;
+      z-index: 1;
+    }
+
+    .sig {
+      max-width: 90%;
+      max-height: 40%;
+      margin-bottom: 4px;
+    }
+
+    .msg {
+      text-align: center;
+      word-wrap: break-word;
+      padding: 0 5px;
+    }
+
+    /* Zoom overlay styling */
+    #zoom-overlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background-color: rgba(0, 0, 0, 0.6);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      z-index: 100;
+    }
+
+    #zoom-content {
+      background-color: white;
+      border: 2px solid #000;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+      padding: 0;
+      width: 20vw;
+      height: 20vw;
+      font-size: 1vw;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    #zoom-content .vip-label {
+      background-color: white;
+      padding: 10px;
+      font-size: 1.2vw;
+      font-weight: bold;
+      text-align: center;
+      border-bottom: 1px solid #ccc;
+      flex-shrink: 0;
+      position: sticky;
+      top: 0;
+      z-index: 1;
+    }
+
+    #zoom-content .zoom-body {
+      padding: 10px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #zoom-content img {
+      max-width: 90%;
+      max-height: 40%;
+      margin-bottom: 10px;
+    }
+
+    #zoom-overlay::after {
+      content: "Click anywhere to close";
+      position: absolute;
+      bottom: 15px;
+      color: #fff;
+      font-size: 1rem;
+    }
+  </style>
+</head>
+<body>
+  <div class="grid">
+    {% for row in range(1, 22) %}
+      {% for col in range(1, 27) %}
+        {% set tile_index = (row - 1) * 26 + (col - 1) %}
+        {% set skip = false %}
+
+        {% if row >= 7 and row < 10 and col >= 12 and col < 16 and not (row == 7 and col == 12) %}
+          {% set skip = true %}
+        {% elif row >= 10 and row < 12 and col >= 11 and col < 13 and not (row == 10 and col == 11) %}
+          {% set skip = true %}
+        {% elif row >= 10 and row < 12 and col >= 13 and col < 15 and not (row == 10 and col == 13) %}
+          {% set skip = true %}
+        {% elif row >= 10 and row < 12 and col >= 15 and col < 17 and not (row == 10 and col == 15) %}
+          {% set skip = true %}
+        {% elif row >= 12 and row < 14 and col >= 10 and col < 12 and not (row == 12 and col == 10) %}
+          {% set skip = true %}
+        {% elif row >= 12 and row < 14 and col >= 12 and col < 14 and not (row == 12 and col == 12) %}
+          {% set skip = true %}
+        {% elif row >= 12 and row < 14 and col >= 14 and col < 16 and not (row == 12 and col == 14) %}
+          {% set skip = true %}
+        {% elif row >= 12 and row < 14 and col >= 16 and col < 18 and not (row == 12 and col == 16) %}
+          {% set skip = true %}
+        {% endif %}
+
+        {% if row == 7 and col == 12 %}
+          <div class="tile" style="grid-column: 12 / span 4; grid-row: 7 / span 3;">
+            <div class="vip-label">DM</div>
+            {% if vip_messages.get('DM') %}
+              <img src="{{ vip_messages['DM']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['DM']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 10 and col == 11 %}
+          <div class="tile" style="grid-column: 11 / span 2; grid-row: 10 / span 2;">
+            <div class="vip-label">PS (D)</div>
+            {% if vip_messages.get('PS (D)') %}
+              <img src="{{ vip_messages['PS (D)']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['PS (D)']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 10 and col == 13 %}
+          <div class="tile" style="grid-column: 13 / span 2; grid-row: 10 / span 2;">
+            <div class="vip-label">PS (DD)</div>
+            {% if vip_messages.get('PS (DD)') %}
+              <img src="{{ vip_messages['PS (DD)']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['PS (DD)']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 10 and col == 15 %}
+          <div class="tile" style="grid-column: 15 / span 2; grid-row: 10 / span 2;">
+            <div class="vip-label">CDF</div>
+            {% if vip_messages.get('CDF') %}
+              <img src="{{ vip_messages['CDF']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['CDF']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 12 and col == 10 %}
+          <div class="tile" style="grid-column: 10 / span 2; grid-row: 12 / span 2;">
+            <div class="vip-label">COA</div>
+            {% if vip_messages.get('COA') %}
+              <img src="{{ vip_messages['COA']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['COA']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 12 and col == 12 %}
+          <div class="tile" style="grid-column: 12 / span 2; grid-row: 12 / span 2;">
+            <div class="vip-label">CAF</div>
+            {% if vip_messages.get('CAF') %}
+              <img src="{{ vip_messages['CAF']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['CAF']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 12 and col == 14 %}
+          <div class="tile" style="grid-column: 14 / span 2; grid-row: 12 / span 2;">
+            <div class="vip-label">CNV</div>
+            {% if vip_messages.get('CNV') %}
+              <img src="{{ vip_messages['CNV']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['CNV']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif row == 12 and col == 16 %}
+          <div class="tile" style="grid-column: 16 / span 2; grid-row: 12 / span 2;">
+            <div class="vip-label">CDIS</div>
+            {% if vip_messages.get('CDIS') %}
+              <img src="{{ vip_messages['CDIS']['signature'] }}" class="sig">
+              <div class="msg">{{ vip_messages['CDIS']['message'] }}</div>
+            {% endif %}
+          </div>
+        {% elif not skip %}
+          {% if tile_index < messages|length %}
+            {% set parts = messages[tile_index].split('|||') %}
+            <div class="tile">
+              {% if parts|length > 1 %}
+                <img src="{{ parts[0] }}" alt="Signature" class="sig">
+                <div class="msg">{{ parts[1] }}</div>
+              {% else %}
+                <div class="msg">{{ messages[tile_index] }}</div>
+              {% endif %}
+            </div>
+          {% elif tile_index < 480 %}
+            <div class="tile"></div>
+          {% else %}
+            <div class="tile">&nbsp;</div>
+          {% endif %}
+        {% endif %}
+      {% endfor %}
+    {% endfor %}
+  </div>
+
+  <!-- Zoom overlay -->
+  <div id="zoom-overlay">
+    <div id="zoom-content"></div>
+  </div>
+
+  <script>
+    const overlay = document.getElementById('zoom-overlay');
+    const zoomContent = document.getElementById('zoom-content');
+
+document.addEventListener('DOMContentLoaded', () => {
+  const overlay = document.getElementById('zoom-overlay');
+  const zoomContent = document.getElementById('zoom-content');
+
+  function triggerZoom(tile) {
+    const label = tile.querySelector('.vip-label');
+    const body = tile.cloneNode(true);
+    if (label) body.removeChild(label);
+
+    zoomContent.innerHTML = `
+      ${label ? `<div class="vip-label">${label.textContent}</div>` : ''}
+      <div class="zoom-body">${body.innerHTML}</div>
+    `;
+    overlay.style.display = 'flex';
+  }
+
+  document.querySelectorAll('.tile').forEach(tile => {
+    tile.addEventListener('click', () => {
+      const linkTo = tile.getAttribute('data-vip-link');
+      if (linkTo) {
+        const mainTile = document.querySelector(`.tile[data-vip='${linkTo}']`);
+        if (mainTile) triggerZoom(mainTile);
+      } else {
+        const hasContent = tile.querySelector('.vip-label') || tile.querySelector('.msg') || tile.querySelector('img');
+        if (hasContent) triggerZoom(tile);
+      }
+    });
+  });
+
+  overlay.addEventListener('click', () => {
+    overlay.style.display = 'none';
+  });
+
+  document.addEventListener('keydown', e => {
+    if (e.key === 'Escape') {
+      overlay.style.display = 'none';
+    }
+  });
+});
+
+  </script>
+</body>
+</html>
